@@ -185,6 +185,8 @@ public class MixtureComponent implements Cloneable, Serializable {
         // appropriate base. If the log base is <code>Math.E</code>,
         // then no operation is necessary.
 
+        assert feature.length == meanTransformed.length;
+        
         for (int i = 0; i < feature.length; i++) {
             float logDiff = feature[i] - meanTransformed[i];
             logDval += logDiff * logDiff * precisionTransformed[i];
