@@ -26,13 +26,24 @@
   <component name="recognizer" type="edu.cmu.sphinx.recognizer.Recognizer">
     <property name="decoder" value="decoder"/>
     <propertylist name="monitors">
+      <item>labelWriter</item>
       <item>speedTracker</item>
       <item>memoryTracker</item>
     </propertylist>
   </component>
+  
+  <component name="labelWriter" type="inpro.sphinx.instrumentation.LabelWriter">
+    <property name="recognizer" value="recognizer"/>
+    <property name="intermediateResults" value="true"/>
+    <property name="finalResult" value="false"/>
+    <property name="wordAlignment" value="true"/>
+    <property name="telltale" value="telltale"/>
+  </component>
 
   <component name="decoder" type="edu.cmu.sphinx.decoder.Decoder">
-    <property name="searchManager" value="wordPruningLookaheadSearchManager"/>
+    <property name="searchManager" value="wordPruningSearchManager"/>
+    <property name="fireNonFinalResults" value="true"/>
+    <property name="featureBlockSize" value="1"/>
   </component>
 
   <component name="alignerSearchManager"
@@ -261,6 +272,7 @@
     <propertylist name="pipeline">
       <item>dataSource </item>
       <item>dataBlocker </item>
+      <item>telltale </item>
       <item>speechClassifier </item>
       <item>speechMarker </item>
       <item>preemphasizer </item>
@@ -275,6 +287,8 @@
 
   <component name="dataSource"
     type="edu.cmu.sphinx.frontend.util.StreamDataSource"/>
+
+  <component name="telltale" type="inpro.sphinx.frontend.FrontendTellTale"/>
 
   <component name="dataBlocker" type="edu.cmu.sphinx.frontend.DataBlocker"/>
 

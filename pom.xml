@@ -23,6 +23,7 @@
     <module>sphinx4-core</module>
     <module>sphinx4-data</module>
     <module>sphinx4-samples</module>
+    <module>sphinx4-incoutput</module>
   </modules>
 
   <dependencies>
