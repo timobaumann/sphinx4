@@ -62,7 +62,7 @@ public class LabelWriter implements Configurable,
     @S4Boolean(defaultValue = false)
     public final static String PROP_FILE_OUTPUT = "fileOutput";
     @S4String(defaultValue = "")
-    public final static String PROP_FILE_BASE_NAME = "fileBaseName";    
+    public final static String PROP_FILE_NAME = "fileName";    
 	@S4Integer(defaultValue = 1)
     public final static String PROP_N_BEST = "nBest";
 	
@@ -82,7 +82,7 @@ public class LabelWriter implements Configurable,
     protected boolean finalResult = true;
     
     private boolean fileOutput = false;
-    private String fileBaseName = "";
+    private String fileName = "";
     
 //    private int nBest = 1;
     
@@ -128,21 +128,15 @@ public class LabelWriter implements Configurable,
         finalResult = ps.getBoolean(PROP_FINAL_RESULT);
         
         fileOutput = ps.getBoolean(PROP_FILE_OUTPUT);
-        fileBaseName = ps.getString(PROP_FILE_BASE_NAME);
+        fileName = ps.getString(PROP_FILE_NAME);
         
         stepWidth = ps.getInt(PROP_STEP_WIDTH);
 
         wordAlignment = ps.getBoolean(PROP_WORD_ALIGNMENT);
-//        phoneAlignment = ps.getBoolean(PROP_PHONE_ALIGNMENT);
 
     	if (wordAlignment) {
     		wordAlignmentStream = setStream("wordalignment");
     	}
-//    	if (phoneAlignment) {
-//    		phoneAlignmentStream = setStream("phonealignment");
-//    	}
-//        nBest = ps.getInt(PROP_N_BEST);
-//		fixedLag = ps.getInt(PROP_FIXED_LAG);
     }
 
     
@@ -159,7 +153,7 @@ public class LabelWriter implements Configurable,
 	private PrintStream setStream(String extension) {
     	PrintStream output = null;
     	if (fileOutput) {
-			String filename = fileBaseName + "." + extension;
+			String filename = fileName + "." + extension;
 			try {
 				output = new PrintStream(filename); 
 			} catch (FileNotFoundException e) {
@@ -171,70 +165,6 @@ public class LabelWriter implements Configurable,
     	}
     	return output;
     }
-
-    /**
-     * convert a token list to an alignment string 
-     * 
-     * @param tokens list of tokens
-     * /
-    public static String tokenListToAlignment(List<Token> tokens, int lastFrame) {
-		StringBuilder sb = new StringBuilder();
-		if (tokens.size() > 0) {
-			boolean tokenFollowsData = ResultUtil.hasWordTokensLast(tokens.get(0));
-			ListIterator<Token> tokenIt = tokens.listIterator();
-			// iterate over the list and print the associated times
-	        while (tokenIt.hasNext()) {
-	            Token token = tokenIt.next();
-	            int startFrame;
-	            int endFrame;
-	            if (tokenFollowsData) {
-	            	if (tokenIt.hasPrevious()) {
-		            	startFrame = tokenIt.previous().getFrameNumber();
-		            	tokenIt.next();
-	            	} else { startFrame = 0; }
-	            	endFrame = token.getFrameNumber();
-	            } else {
-	            	startFrame = token.getFrameNumber();
-	            	if (tokenIt.hasNext()) {
-		            	endFrame = tokenIt.next().getFrameNumber();
-		            	tokenIt.previous();
-	            	} else break;
-	            }
-	            sb.append(String.format(Locale.US, "%.2f", startFrame * TimeUtil.FRAME_TO_SECOND_FACTOR)); // a frame always lasts 10ms 
-	            sb.append("\t");
-	            sb.append(String.format(Locale.US, "%.2f", endFrame * TimeUtil.FRAME_TO_SECOND_FACTOR)); // dito
-	            sb.append("\t");
-	            // depending on whether word, filler or other, dump the string-representation
-	            SearchState state = token.getSearchState();
-	            sb.append(ResultUtil.stringForSearchState(state)); 
-	            sb.append("\n");
-	            if (endFrame > lastFrame)
-	            	break;
-	        }
-		}
-        return sb.toString();
-    } */
-
-    /**
-     * write labels of aligned segments or words  
-     * to stream &lt;!--if it differs from lastAlignment--&gt;
-     * @param list
-     * @param stream
-     * @param timestamp
-     *
-    private String writeAlignment(List<Token> list, PrintStream stream, boolean timestamp) {
-    	String alignment = tokenListToAlignment(list, timestamp ? step - fixedLag : Integer.MAX_VALUE);
-		if (timestamp) {
-			stream.print("Time: ");
-			stream.println(step / 100.0);
-		}
-		if (alignment.equals("")) {
-			stream.println("0.0\t" + step / 100.0 + "\t<sil>\n");
-		} else {
-			stream.println(alignment);
-		}
-    	return alignment;
-    } */
 
     /** a frame lasts 0.01 seconds (= 10 milliseconds) */
     public static double FRAME_TO_SECOND_FACTOR = 0.01;
@@ -268,35 +198,8 @@ public class LabelWriter implements Configurable,
                                                wr.getWord().getSpelling());
     			}
     			wordAlignmentStream.println();
+    			wordAlignmentStream.flush();
     		}
-    		// create n-best list
-/*    		List<Token> nBestList;
-    		if (nBest == 1) {
-    			nBestList = Collections.singletonList(result.getBestToken());
-    		} else {
-	    		nBestList = result.getResultTokens();
-	    		if (nBestList.size() <= 0) {
-	    			System.out.println("# reverting to active tokens...");
-	    			nBestList = result.getActiveTokens().getTokens();
-	    		}
-	    		Collections.sort(nBestList, Token.COMPARATOR);
-	    		if (nBestList.size() > nBest) {
-	    			nBestList = nBestList.subList(0, nBest);
-	    		}
-    		}
-    		// iterate through n-best list
-    		Iterator<Token> nBestIt = nBestList.iterator();
-    		while (nBestIt.hasNext()) {
-    			Token nBestToken = nBestIt.next();
-	    		if (wordAlignment) {
-	    			List<Token> wordTokenList = ResultUtil.getTokenList(nBestToken, true, false);
-	    			writeAlignment(wordTokenList, wordAlignmentStream, timestamp);
-	    		}
-	    		if (phoneAlignment) {
-	    			List<Token> phoneTokenList = ResultUtil.getTokenList(nBestToken, false, true);
-	    			writeAlignment(phoneTokenList, phoneAlignmentStream, timestamp);
-	    		}
-    		} */
     	}
     	if (result.isFinal()) {
     		committedWords.addAll(result.getTimedBestResult(true));
@@ -307,6 +210,8 @@ public class LabelWriter implements Configurable,
 	public void statusChanged(State status) {
 		if (status == State.RECOGNIZING) {
 			step = 0;
+		} else if (status == State.DEALLOCATING) {
+			wordAlignmentStream.close();
 		}
 	}
     

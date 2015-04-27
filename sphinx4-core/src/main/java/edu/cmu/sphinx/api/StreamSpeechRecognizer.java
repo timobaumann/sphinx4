@@ -34,6 +34,9 @@ public class StreamSpeechRecognizer extends AbstractSpeechRecognizer {
         super(configuration);
     }
 
+    public StreamSpeechRecognizer(Context context) throws IOException { super(context); }
+    
+    
     public void startRecognition(InputStream stream) {
         startRecognition(stream, TimeFrame.INFINITE);
     }

@@ -37,6 +37,8 @@
     <property name="intermediateResults" value="true"/>
     <property name="finalResult" value="false"/>
     <property name="wordAlignment" value="true"/>
+    <property name="fileOutput" value="true"/>
+    <property name="fileName" value=""/>
     <property name="telltale" value="telltale"/>
   </component>
 
