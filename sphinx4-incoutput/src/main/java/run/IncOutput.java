@@ -32,6 +32,7 @@ public class IncOutput {
         System.out.println("Loading models...");
 
         Configuration configuration = new Configuration();
+        configuration.setSampleRate(sampleRate);
 
         // Load model from the jar
         configuration
